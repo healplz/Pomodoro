@@ -4,6 +4,8 @@ import { tasks } from "@/db/schema";
 import { eq, isNull } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) {

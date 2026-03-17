@@ -5,6 +5,8 @@ import { and, desc, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { computeStreak } from "@/lib/streak";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   const session = await auth();
   if (!session?.user?.id) {
