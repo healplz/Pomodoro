@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { tasks } from "@/db/schema";
 import { eq, isNull } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -12,7 +12,7 @@ export async function GET() {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const userTasks = await db
+  const userTasks = await getDb()
     .select()
     .from(tasks)
     .where(eq(tasks.userId, session.user.id));
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     return new NextResponse("Name is required", { status: 400 });
   }
 
-  const [task] = await db
+  const [task] = await getDb()
     .insert(tasks)
     .values({ userId: session.user.id, name, color })
     .returning();

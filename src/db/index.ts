@@ -13,12 +13,3 @@ export function getDb() {
   }
   return _db;
 }
-
-// Backwards-compatible named export — delegates to lazy singleton
-export const db = new Proxy({} as ReturnType<typeof drizzle>, {
-  get(_target, prop) {
-    const instance = getDb();
-    const value = (instance as unknown as Record<string | symbol, unknown>)[prop];
-    return typeof value === "function" ? value.bind(instance) : value;
-  },
-});

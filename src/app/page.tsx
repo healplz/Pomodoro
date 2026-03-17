@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { pomodoroSessions, tasks } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { computeStreak } from "@/lib/streak";
@@ -16,13 +16,13 @@ export default async function Home() {
   const today = new Date().toLocaleDateString("en-CA");
 
   // Fetch user's active tasks
-  const userTasks = await db
+  const userTasks = await getDb()
     .select()
     .from(tasks)
     .where(eq(tasks.userId, userId));
 
   // Fetch all sessions (for streak and today's dots)
-  const allSessions = await db
+  const allSessions = await getDb()
     .select({
       id: pomodoroSessions.id,
       durationSeconds: pomodoroSessions.durationSeconds,

@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { tasks } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -25,7 +25,7 @@ export async function PATCH(
     return new NextResponse("No valid fields", { status: 400 });
   }
 
-  const [task] = await db
+  const [task] = await getDb()
     .update(tasks)
     .set(updates)
     .where(and(eq(tasks.id, id), eq(tasks.userId, session.user.id)))
@@ -47,7 +47,7 @@ export async function DELETE(
   const { id } = await params;
 
   // Soft-delete by setting archivedAt
-  const [task] = await db
+  const [task] = await getDb()
     .update(tasks)
     .set({ archivedAt: new Date() })
     .where(and(eq(tasks.id, id), eq(tasks.userId, session.user.id)))

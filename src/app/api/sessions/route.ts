@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { pomodoroSessions, tasks } from "@/db/schema";
 import { and, desc, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -20,7 +20,7 @@ export async function GET(request: Request) {
   const today = searchParams.get("today") ?? new Date().toLocaleDateString("en-CA");
 
   // Fetch sessions with task info
-  const rows = await db
+  const rows = await getDb()
     .select({
       id: pomodoroSessions.id,
       durationSeconds: pomodoroSessions.durationSeconds,
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
     return new NextResponse("Invalid duration", { status: 400 });
   }
 
-  const [newSession] = await db
+  const [newSession] = await getDb()
     .insert(pomodoroSessions)
     .values({
       userId: session.user.id,
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
     .returning();
 
   // Recompute stats
-  const allSessions = await db
+  const allSessions = await getDb()
     .select({
       id: pomodoroSessions.id,
       durationSeconds: pomodoroSessions.durationSeconds,

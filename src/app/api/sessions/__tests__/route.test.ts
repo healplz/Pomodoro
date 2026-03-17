@@ -5,7 +5,8 @@ import { GET, POST } from "../route";
 
 // --- Mocks ---
 jest.mock("@/auth", () => ({ auth: jest.fn() }));
-jest.mock("@/db", () => ({ db: { select: jest.fn(), insert: jest.fn() } }));
+const mockDb = { select: jest.fn(), insert: jest.fn() };
+jest.mock("@/db", () => ({ getDb: () => mockDb }));
 jest.mock("@/db/schema", () => ({ pomodoroSessions: {}, tasks: {} }));
 jest.mock("drizzle-orm", () => ({
   eq: jest.fn(),
@@ -15,7 +16,7 @@ jest.mock("drizzle-orm", () => ({
 jest.mock("@/lib/streak", () => ({ computeStreak: jest.fn().mockReturnValue(3) }));
 
 import { auth } from "@/auth";
-import { db } from "@/db";
+const db = mockDb;
 import { computeStreak } from "@/lib/streak";
 
 const TODAY = new Date().toLocaleDateString("en-CA");

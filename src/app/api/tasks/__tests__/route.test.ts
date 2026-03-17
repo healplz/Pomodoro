@@ -5,12 +5,13 @@ import { GET, POST } from "../route";
 
 // --- Mocks ---
 jest.mock("@/auth", () => ({ auth: jest.fn() }));
-jest.mock("@/db", () => ({ db: { select: jest.fn(), insert: jest.fn() } }));
+const mockDb = { select: jest.fn(), insert: jest.fn() };
+jest.mock("@/db", () => ({ getDb: () => mockDb }));
 jest.mock("@/db/schema", () => ({ tasks: {} }));
 jest.mock("drizzle-orm", () => ({ eq: jest.fn(), isNull: jest.fn() }));
 
 import { auth } from "@/auth";
-import { db } from "@/db";
+const db = mockDb;
 
 // Helper to build a chainable Drizzle select mock
 function mockSelect(result: unknown[]) {

@@ -5,12 +5,13 @@ import { PATCH, DELETE } from "../route";
 
 // --- Mocks ---
 jest.mock("@/auth", () => ({ auth: jest.fn() }));
-jest.mock("@/db", () => ({ db: { update: jest.fn() } }));
+const mockDb = { update: jest.fn() };
+jest.mock("@/db", () => ({ getDb: () => mockDb }));
 jest.mock("@/db/schema", () => ({ tasks: {} }));
 jest.mock("drizzle-orm", () => ({ eq: jest.fn(), and: jest.fn() }));
 
 import { auth } from "@/auth";
-import { db } from "@/db";
+const db = mockDb;
 
 function mockUpdate(result: unknown[]) {
   const chain = {
