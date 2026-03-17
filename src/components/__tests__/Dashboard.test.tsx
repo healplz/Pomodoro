@@ -9,6 +9,7 @@ const DEFAULT_PROPS = {
   initialTasks: [],
   initialTodaySessions: [],
   initialStreak: 0,
+  initialMaxMinutes: 25,
 };
 
 beforeEach(() => {
@@ -101,10 +102,10 @@ describe("Dashboard", () => {
     expect(signOut).toHaveBeenCalledWith({ callbackUrl: "/sign-in" });
   });
 
-  it("renders the timer dial placeholder on mount", async () => {
+  it("renders the timer dial on mount showing the pomo duration", async () => {
     render(<Dashboard {...DEFAULT_PROPS} />);
     await waitFor(() => {
-      expect(screen.getByText("0")).toBeInTheDocument();
+      expect(screen.getByText("25")).toBeInTheDocument();
     });
   });
 });

@@ -71,3 +71,10 @@ export const pomodoroSessions = sqliteTable("pomodoro_sessions", {
   // Sent from client to capture user's local date (avoids server timezone issues)
   completionDate: text("completion_date").notNull(),
 });
+
+export const userSettings = sqliteTable("user_settings", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  pomoDurationMinutes: integer("pomo_duration_minutes").notNull().default(25),
+});

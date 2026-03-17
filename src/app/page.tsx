@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { getDb } from "@/db";
-import { pomodoroSessions, tasks } from "@/db/schema";
+import { pomodoroSessions, tasks, userSettings } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { computeStreak } from "@/lib/streak";
 import { Dashboard } from "@/components/Dashboard";
@@ -48,6 +48,13 @@ export default async function Home() {
     ...new Set(allSessions.map((s) => s.completionDate)),
   ].sort((a, b) => b.localeCompare(a));
 
+  // Fetch user settings
+  const settingsRow = await getDb()
+    .select()
+    .from(userSettings)
+    .where(eq(userSettings.userId, userId));
+  const pomoDurationMinutes = settingsRow[0]?.pomoDurationMinutes ?? 25;
+
   return (
     <Dashboard
       user={{
@@ -59,6 +66,7 @@ export default async function Home() {
         .map((t) => ({ id: t.id, name: t.name, color: t.color }))}
       initialTodaySessions={todaySessions}
       initialStreak={computeStreak(uniqueDates)}
+      initialMaxMinutes={pomoDurationMinutes}
     />
   );
 }
