@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pomodoro
 
-## Getting Started
+A Next.js Pomodoro timer app with Google OAuth, drag-to-set timer, task tracking, dots, and daily streaks.
 
-First, run the development server:
+## Tech Stack
+
+- **Next.js 16** (App Router, TypeScript, Tailwind CSS v4)
+- **SQLite** via Drizzle ORM + better-sqlite3
+- **Auth.js v5** with Google OAuth
+- **Framer Motion** for drag interactions
+
+## Local Development
+
+### 1. Environment variables
+
+Create `.env.local`:
+
+```env
+AUTH_SECRET=        # openssl rand -base64 32
+AUTH_GOOGLE_ID=     # from Google Cloud Console
+AUTH_GOOGLE_SECRET= # from Google Cloud Console
+```
+
+Google OAuth redirect URI: `http://localhost:3000/api/auth/callback/google`
+
+### 2. Database
+
+```bash
+npm run db:migrate
+```
+
+### 3. Run
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Database Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run db:generate  # generate migrations from schema changes
+npm run db:migrate   # apply migrations
+npm run db:studio    # open Drizzle Studio
+```
 
-## Learn More
+## Tests
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm test             # run all tests
+npm test -- --coverage
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+122 tests across 13 suites, ~91% statement coverage.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deployment
 
-## Deploy on Vercel
+This app uses **SQLite with better-sqlite3**, which requires a **persistent filesystem**. It is **not compatible with serverless platforms** (Vercel, Netlify, Cloudflare Pages) without first migrating to a hosted database like PostgreSQL or Turso.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Recommended host: **[Railway](https://railway.app)** — supports persistent volumes, auto-deploys from GitHub, and requires no database changes.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Railway setup
+
+1. Connect your GitHub repo in the Railway dashboard
+2. Add the same environment variables from `.env.local` as Railway service variables
+3. Add a startup command so the DB is initialized on first deploy:
+   ```
+   npm run db:migrate && npm start
+   ```
