@@ -27,6 +27,7 @@ export default async function Home() {
       id: pomodoroSessions.id,
       durationSeconds: pomodoroSessions.durationSeconds,
       completionDate: pomodoroSessions.completionDate,
+      taskId: pomodoroSessions.taskId,
       taskColor: tasks.color,
     })
     .from(pomodoroSessions)
@@ -38,7 +39,8 @@ export default async function Home() {
     .filter((s) => s.completionDate === today)
     .map((s) => ({
       id: s.id,
-      color: s.taskColor ?? "#E63946",
+      taskId: s.taskId ?? null,
+      color: s.taskColor ?? "#31C202",
       durationSeconds: s.durationSeconds,
     }));
 

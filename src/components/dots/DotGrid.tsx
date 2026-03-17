@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export interface DotSession {
   id: string;
-  color: string; // task color or default
+  taskId: string | null;
+  color: string;
   durationSeconds: number;
 }
 
@@ -12,6 +13,34 @@ interface Props {
   sessions: DotSession[];
 }
 
+/** Inline row of dots — used inside TaskList rows. */
+export function DotRow({ sessions }: Props) {
+  return (
+    <div className="flex flex-wrap gap-1.5 items-center">
+      <AnimatePresence>
+        {sessions.map((s) => (
+          <motion.div
+            key={s.id}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 500, damping: 28 }}
+            title={`${Math.round(s.durationSeconds / 60)} min`}
+          >
+            <div
+              className="w-3.5 h-3.5 rounded-full"
+              style={{
+                backgroundColor: s.color,
+                boxShadow: `0 0 6px ${s.color}99`,
+              }}
+            />
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/** Kept for backwards-compat / tests. */
 export function DotGrid({ sessions }: Props) {
   if (sessions.length === 0) {
     return (
@@ -31,25 +60,15 @@ export function DotGrid({ sessions }: Props) {
               key={s.id}
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{
-                type: "spring",
-                stiffness: 500,
-                damping: 28,
-                delay: i * 0.03,
-              }}
+              transition={{ type: "spring", stiffness: 500, damping: 28, delay: i * 0.03 }}
               title={`${Math.round(s.durationSeconds / 60)} min session`}
             >
               <div
                 className="w-5 h-5 rounded-full"
-                style={{
-                  backgroundColor: s.color,
-                  boxShadow: `0 0 8px ${s.color}88`,
-                }}
+                style={{ backgroundColor: s.color, boxShadow: `0 0 8px ${s.color}88` }}
               />
             </motion.div>
           ))}
-
-          {/* Milestone: every 4 dots gets a tomato emoji marker */}
           {sessions.length > 0 && sessions.length % 4 === 0 && (
             <motion.div
               key="milestone"

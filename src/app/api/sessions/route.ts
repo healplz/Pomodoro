@@ -39,7 +39,8 @@ export async function GET(request: Request) {
     .filter((r) => r.completionDate === today)
     .map((r) => ({
       id: r.id,
-      color: r.taskColor ?? "#E63946",
+      taskId: r.taskId ?? null,
+      color: r.taskColor ?? "#31C202",
       durationSeconds: r.durationSeconds,
     }));
 
@@ -87,6 +88,7 @@ export async function POST(request: Request) {
       id: pomodoroSessions.id,
       durationSeconds: pomodoroSessions.durationSeconds,
       completionDate: pomodoroSessions.completionDate,
+      taskId: pomodoroSessions.taskId,
       taskColor: tasks.color,
     })
     .from(pomodoroSessions)
@@ -98,7 +100,8 @@ export async function POST(request: Request) {
     .filter((r) => r.completionDate === completionDate)
     .map((r) => ({
       id: r.id,
-      color: r.taskColor ?? "#E63946",
+      taskId: r.taskId ?? null,
+      color: r.taskColor ?? "#31C202",
       durationSeconds: r.durationSeconds,
     }));
 

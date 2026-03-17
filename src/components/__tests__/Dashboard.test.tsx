@@ -48,32 +48,17 @@ describe("Dashboard", () => {
     expect(screen.queryByText(/days?/)).not.toBeInTheDocument();
   });
 
-  it("renders the task picker", () => {
+  it("renders the Tasks section heading", () => {
     render(<Dashboard {...DEFAULT_PROPS} />);
-    expect(screen.getByText("No task")).toBeInTheDocument();
+    expect(screen.getByText("Tasks")).toBeInTheDocument();
   });
 
-  it("renders the empty dot grid message", () => {
+  it("renders the new task button", () => {
     render(<Dashboard {...DEFAULT_PROPS} />);
-    expect(
-      screen.getByText("Complete a session to earn your first dot")
-    ).toBeInTheDocument();
+    expect(screen.getByText("New task")).toBeInTheDocument();
   });
 
-  it("renders initial sessions as dots", () => {
-    render(
-      <Dashboard
-        {...DEFAULT_PROPS}
-        initialTodaySessions={[
-          { id: "s1", color: "#31C202", durationSeconds: 1500 },
-        ]}
-      />
-    );
-    expect(screen.getByText("Today")).toBeInTheDocument();
-    expect(screen.getByTitle("25 min session")).toBeInTheDocument();
-  });
-
-  it("renders initial tasks in the task picker", () => {
+  it("renders initial tasks in the task list", () => {
     render(
       <Dashboard
         {...DEFAULT_PROPS}
@@ -83,6 +68,32 @@ describe("Dashboard", () => {
     expect(screen.getByText("Focus")).toBeInTheDocument();
   });
 
+  it("renders dots alongside a task when sessions are associated", () => {
+    render(
+      <Dashboard
+        {...DEFAULT_PROPS}
+        initialTasks={[{ id: "t1", name: "Focus", color: "#31C202" }]}
+        initialTodaySessions={[
+          { id: "s1", taskId: "t1", color: "#31C202", durationSeconds: 1500 },
+        ]}
+      />
+    );
+    expect(screen.getByTitle("25 min")).toBeInTheDocument();
+  });
+
+  it("renders unassigned sessions under a No task row", () => {
+    render(
+      <Dashboard
+        {...DEFAULT_PROPS}
+        initialTodaySessions={[
+          { id: "s1", taskId: null, color: "#31C202", durationSeconds: 900 },
+        ]}
+      />
+    );
+    expect(screen.getByText("No task")).toBeInTheDocument();
+    expect(screen.getByTitle("15 min")).toBeInTheDocument();
+  });
+
   it("calls signOut when Sign out is clicked", async () => {
     const { signOut } = require("next-auth/react");
     render(<Dashboard {...DEFAULT_PROPS} />);
@@ -90,21 +101,9 @@ describe("Dashboard", () => {
     expect(signOut).toHaveBeenCalledWith({ callbackUrl: "/sign-in" });
   });
 
-  it("updates dots and streak after a session completes via the API", async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        todaySessions: [{ id: "s1", color: "#31C202", durationSeconds: 1500 }],
-        streak: 2,
-      }),
-    });
-
+  it("renders the timer dial placeholder on mount", async () => {
     render(<Dashboard {...DEFAULT_PROPS} />);
-
-    // Manually invoke the handler (simulates TimerDial calling onComplete)
-    // We test the state update by triggering it through the exposed prop chain
     await waitFor(() => {
-      // The timer dial placeholder is rendered (mounted=false state)
       expect(screen.getByText("0")).toBeInTheDocument();
     });
   });

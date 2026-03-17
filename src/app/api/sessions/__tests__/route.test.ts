@@ -90,7 +90,7 @@ describe("GET /api/sessions", () => {
     expect(data.todaySessions[0].id).toBe("sess-1");
   });
 
-  it("falls back to '#E63946' when task color is null", async () => {
+  it("falls back to '#31C202' when task color is null", async () => {
     (auth as jest.Mock).mockResolvedValue(MOCK_SESSION_USER);
     mockSelect([{ ...MOCK_ROW, taskColor: null }]);
 
@@ -98,7 +98,7 @@ describe("GET /api/sessions", () => {
     const res = await GET(req);
     const data = await res.json();
 
-    expect(data.todaySessions[0].color).toBe("#E63946");
+    expect(data.todaySessions[0].color).toBe("#31C202");
   });
 
   it("returns the streak from computeStreak", async () => {

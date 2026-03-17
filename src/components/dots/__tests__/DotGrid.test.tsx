@@ -4,6 +4,7 @@ import { DotGrid, type DotSession } from "../DotGrid";
 const makeSessions = (count: number): DotSession[] =>
   Array.from({ length: count }, (_, i) => ({
     id: `session-${i}`,
+    taskId: null,
     color: "#31C202",
     durationSeconds: 1500,
   }));
@@ -44,8 +45,8 @@ describe("DotGrid", () => {
 
     it("uses the session's durationSeconds to compute the title", () => {
       const sessions: DotSession[] = [
-        { id: "a", color: "#31C202", durationSeconds: 600 }, // 10 min
-        { id: "b", color: "#02C25E", durationSeconds: 3600 }, // 60 min
+        { id: "a", taskId: null, color: "#31C202", durationSeconds: 600 }, // 10 min
+        { id: "b", taskId: null, color: "#02C25E", durationSeconds: 3600 }, // 60 min
       ];
       render(<DotGrid sessions={sessions} />);
       expect(screen.getByTitle("10 min session")).toBeInTheDocument();

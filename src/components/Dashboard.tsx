@@ -4,9 +4,9 @@ import { useState } from "react";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
 import { TimerDial } from "@/components/timer/TimerDial";
-import { TaskPicker, type Task } from "@/components/tasks/TaskPicker";
-import { DotGrid, type DotSession } from "@/components/dots/DotGrid";
+import { TaskList, type Task } from "@/components/tasks/TaskList";
 import { StreakBadge } from "@/components/dots/StreakBadge";
+import type { DotSession } from "@/components/dots/DotGrid";
 
 interface Props {
   user: { name: string; image: string };
@@ -23,8 +23,7 @@ export function Dashboard({
 }: Props) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [todaySessions, setTodaySessions] =
-    useState<DotSession[]>(initialTodaySessions);
+  const [todaySessions, setTodaySessions] = useState<DotSession[]>(initialTodaySessions);
   const [streak, setStreak] = useState(initialStreak);
 
   async function handleSessionComplete(durationSeconds: number) {
@@ -47,7 +46,7 @@ export function Dashboard({
       setTodaySessions(data.todaySessions);
       setStreak(data.streak);
     } catch {
-      // Silently fail — the user still completed the session visually
+      // Silently fail — user still completed the session visually
     }
   }
 
@@ -90,18 +89,11 @@ export function Dashboard({
       </header>
 
       {/* Main content */}
-      <div className="flex flex-col items-center gap-8 px-6 pt-4 pb-12 w-full max-w-2xl">
-        {/* Task picker */}
-        <TaskPicker
-          tasks={tasks}
-          selectedId={selectedTask?.id ?? null}
-          onSelect={setSelectedTask}
-          onTaskCreated={(task) => setTasks((prev) => [...prev, task])}
-        />
+      <div className="flex flex-col items-center gap-6 px-6 pt-4 pb-12 w-full max-w-2xl">
 
-        {/* Timer + dots — framed in a contrast card */}
+        {/* Timer */}
         <div
-          className="w-full rounded-3xl px-5 py-6 flex flex-col gap-6"
+          className="w-full rounded-3xl px-5 py-6"
           style={{
             background: "rgba(0,0,0,0.22)",
             boxShadow: "inset 0 1px 0 rgba(202,236,252,0.07), 0 4px 24px rgba(0,0,0,0.2)",
@@ -111,7 +103,24 @@ export function Dashboard({
             taskColor={selectedTask?.color ?? "#31C202"}
             onComplete={handleSessionComplete}
           />
-          <DotGrid sessions={todaySessions} />
+        </div>
+
+        {/* Task list with inline dots */}
+        <div
+          className="w-full rounded-3xl px-5 py-4"
+          style={{
+            background: "rgba(0,0,0,0.22)",
+            boxShadow: "inset 0 1px 0 rgba(202,236,252,0.07), 0 4px 24px rgba(0,0,0,0.2)",
+          }}
+        >
+          <p className="text-xs font-bold text-fg/50 uppercase tracking-widest mb-3">Tasks</p>
+          <TaskList
+            tasks={tasks}
+            selectedId={selectedTask?.id ?? null}
+            onSelect={setSelectedTask}
+            onTaskCreated={(task) => setTasks((prev) => [...prev, task])}
+            sessions={todaySessions}
+          />
         </div>
       </div>
     </main>
