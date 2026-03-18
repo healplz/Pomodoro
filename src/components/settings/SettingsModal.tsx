@@ -60,7 +60,7 @@ export function SettingsModal({ open, currentMinutes, currentWaitMinutes, curren
                 return (
                   <button
                     key={min}
-                    onClick={() => { onSave(min); onClose(); }}
+                    onClick={() => onSave(min)}
                     className="py-3 rounded-xl text-sm font-bold transition-all"
                     style={{
                       background: isSelected ? fg(0.25) : fg(0.08),
