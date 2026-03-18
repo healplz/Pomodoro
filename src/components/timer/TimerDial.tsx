@@ -73,8 +73,9 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
     []
   );
 
-  const handlePointerDown = useCallback(
-    (e: React.PointerEvent) => {
+  // Shared drag logic used by both pointer and touch handlers
+  const startDrag = useCallback(
+    (clientX: number) => {
       if (phase === "running" || disabled) return;
       if (phase === "resting") {
         setPhase("idle");
@@ -82,21 +83,19 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
         setFillPct(0);
         return;
       }
-      e.preventDefault();
-      e.currentTarget.setPointerCapture(e.pointerId);
-      dragStartX.current = e.clientX;
+      dragStartX.current = clientX;
       dragStartFill.current = fillPct;
       wasAtMax.current = false;
       setPhase("dragging");
     },
-    [phase, fillPct]
+    [phase, fillPct, disabled]
   );
 
-  const handlePointerMove = useCallback(
-    (e: React.PointerEvent) => {
+  const moveDrag = useCallback(
+    (clientX: number) => {
       if (phase !== "dragging") return;
       const trackW = getTrackWidth();
-      const dx = e.clientX - dragStartX.current;
+      const dx = clientX - dragStartX.current;
       // Cap drag distance to 85% of viewport so mobile users can always
       // reach 100% in one swipe. On desktop RESISTANCE still applies.
       const maxDrag = Math.min(trackW * RESISTANCE, window.innerWidth * 0.85);
@@ -115,7 +114,7 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
     [phase, getTrackWidth]
   );
 
-  const handlePointerUp = useCallback(() => {
+  const endDrag = useCallback(() => {
     if (phase !== "dragging") return;
     if (fillPct >= 100) {
       totalSecondsRef.current = maxMinutes * 60;
@@ -127,6 +126,46 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
       setPhase("idle");
     }
   }, [phase, fillPct, maxMinutes]);
+
+  // Pointer event handlers (desktop + some mobile)
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      e.preventDefault();
+      e.currentTarget.setPointerCapture(e.pointerId);
+      startDrag(e.clientX);
+    },
+    [startDrag]
+  );
+
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent) => { moveDrag(e.clientX); },
+    [moveDrag]
+  );
+
+  const handlePointerUp = useCallback(() => {
+    endDrag();
+  }, [endDrag]);
+
+  // Touch event handlers (mobile fallback)
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+      startDrag(e.touches[0].clientX);
+    },
+    [startDrag]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+      moveDrag(e.touches[0].clientX);
+    },
+    [moveDrag]
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    endDrag();
+  }, [endDrag]);
 
   const handleCancel = useCallback(() => {
     setPhase("idle");
@@ -297,6 +336,9 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         {/* Major tick lines */}
         {majorTicks
