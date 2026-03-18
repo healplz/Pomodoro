@@ -272,7 +272,7 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
             className="absolute text-[11px] font-semibold -translate-x-1/2"
             style={{
               left: `${(min / maxMinutes) * 100}%`,
-              color: fg(isRunning ? 0.8 : 0.55),
+              color: fg(0.7),
             }}
           >
             {min > 0 && min < maxMinutes ? min : ""}
@@ -305,7 +305,7 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
               className="absolute top-2 bottom-2 w-px"
               style={{
                 left: `${(min / maxMinutes) * 100}%`,
-                backgroundColor: fg(0.28),
+                backgroundColor: fg(0.45),
               }}
             />
           ))}
@@ -382,7 +382,7 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
               className="absolute top-0 w-px h-1.5 -translate-x-1/2"
               style={{
                 left: `${(min / maxMinutes) * 100}%`,
-                backgroundColor: fg(0.35),
+                backgroundColor: fg(0.45),
               }}
             />
           ))}
