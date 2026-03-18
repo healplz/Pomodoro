@@ -200,6 +200,19 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
     handleComplete
   );
 
+  // In strict mode, auto-return to idle when break completes —
+  // avoids the tap-then-layout-shift that happens with manual dismissal.
+  useEffect(() => {
+    if (!strictMode || phase !== "resting") return;
+    if (breakSeconds < waitMinutes * 60) return;
+    const t = setTimeout(() => {
+      setPhase("idle");
+      setBreakSeconds(0);
+      setFillPct(0);
+    }, 800); // brief pause so "Break over" is visible before returning
+    return () => clearTimeout(t);
+  }, [strictMode, phase, breakSeconds, waitMinutes]);
+
   useEffect(() => {
     if (phase === "complete") {
       const t = setTimeout(() => {
