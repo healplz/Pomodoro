@@ -82,6 +82,7 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
         setFillPct(0);
         return;
       }
+      e.preventDefault();
       e.currentTarget.setPointerCapture(e.pointerId);
       dragStartX.current = e.clientX;
       dragStartFill.current = fillPct;
@@ -295,7 +296,7 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
+        onPointerCancel={handlePointerUp}
       >
         {/* Major tick lines */}
         {majorTicks
