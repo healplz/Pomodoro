@@ -96,9 +96,10 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
       if (phase !== "dragging") return;
       const trackW = getTrackWidth();
       const dx = e.clientX - dragStartX.current;
-      // Quadratic ease-out over RESISTANCE × trackWidth of travel.
-      // Fills quickly at first, then the last stretch demands real effort.
-      const rawProgress = Math.max(0, dx) / (trackW * RESISTANCE);
+      // Cap drag distance to 85% of viewport so mobile users can always
+      // reach 100% in one swipe. On desktop RESISTANCE still applies.
+      const maxDrag = Math.min(trackW * RESISTANCE, window.innerWidth * 0.85);
+      const rawProgress = Math.max(0, dx) / maxDrag;
       const eased = 1 - Math.pow(1 - Math.min(1, rawProgress), 2);
       const newFill = Math.max(0, eased * 100);
       setFillPct(newFill);
