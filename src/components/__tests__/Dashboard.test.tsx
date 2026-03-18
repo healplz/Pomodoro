@@ -82,19 +82,6 @@ describe("Dashboard", () => {
     expect(screen.getByTitle("25 min")).toBeInTheDocument();
   });
 
-  it("renders unassigned sessions under a No task row", () => {
-    render(
-      <Dashboard
-        {...DEFAULT_PROPS}
-        initialTodaySessions={[
-          { id: "s1", taskId: null, color: "#31C202", durationSeconds: 900 },
-        ]}
-      />
-    );
-    expect(screen.getByText("No task")).toBeInTheDocument();
-    expect(screen.getByTitle("15 min")).toBeInTheDocument();
-  });
-
   it("calls signOut when Sign out is clicked", async () => {
     const { signOut } = require("next-auth/react");
     render(<Dashboard {...DEFAULT_PROPS} />);

@@ -32,8 +32,7 @@ export function TaskList({ tasks, selectedId, onSelect, onTaskCreated, sessions 
     return acc;
   }, {});
 
-  const unassignedSessions = sessionsByTask["__none__"] ?? [];
-  const hasSessions = sessions.length > 0;
+  const hasTasks = tasks.length > 0;
 
   const rowBase = {
     borderRadius: 12,
@@ -58,7 +57,7 @@ export function TaskList({ tasks, selectedId, onSelect, onTaskCreated, sessions 
           return (
             <motion.button
               key={task.id}
-              onClick={() => onSelect(isSelected ? null : task)}
+              onClick={() => onSelect(task)}
               whileTap={{ scale: 0.985 }}
               style={{
                 ...rowBase,
@@ -90,35 +89,8 @@ export function TaskList({ tasks, selectedId, onSelect, onTaskCreated, sessions 
           );
         })}
 
-        {/* No-task row — only shown when there are unassigned sessions */}
-        {unassignedSessions.length > 0 && (
-          <motion.button
-            onClick={() => onSelect(null)}
-            whileTap={{ scale: 0.985 }}
-            style={{
-              ...rowBase,
-              background: selectedId === null ? fg(0.12) : fg(0.04),
-              borderColor: selectedId === null ? fg(0.25) : fg(0.08),
-              width: "100%",
-              textAlign: "left",
-            }}
-          >
-            <span
-              className="w-3 h-3 rounded-full flex-shrink-0 border"
-              style={{ borderColor: fg(0.3) }}
-            />
-            <span
-              className="text-sm font-semibold flex-1"
-              style={{ color: fg(0.55) }}
-            >
-              No task
-            </span>
-            <DotRow sessions={unassignedSessions} />
-          </motion.button>
-        )}
-
         {/* Empty state */}
-        {!hasSessions && tasks.length === 0 && (
+        {!hasTasks && (
           <p className="text-center text-sm py-2" style={{ color: fg(0.4) }}>
             Add a task to get started
           </p>

@@ -25,7 +25,9 @@ export function Dashboard({
   initialMaxMinutes,
 }: Props) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(
+    initialTasks[0] ?? null
+  );
   const [todaySessions, setTodaySessions] = useState<DotSession[]>(initialTodaySessions);
   const [streak, setStreak] = useState(initialStreak);
   const [pomoDurationMinutes, setPomoDurationMinutes] = useState(initialMaxMinutes);
@@ -129,6 +131,7 @@ export function Dashboard({
           <TimerDial
             maxMinutes={pomoDurationMinutes}
             taskColor={selectedTask?.color ?? "#31C202"}
+            disabled={!selectedTask}
             onComplete={handleSessionComplete}
           />
         </div>

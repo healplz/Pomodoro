@@ -33,13 +33,19 @@ function playBell() {
   }
 }
 
+// How many track-widths of drag are needed to fill the bar.
+// Higher = heavier. Combined with ease-out curve, the last stretch
+// requires disproportionate effort.
+const RESISTANCE = 1.8;
+
 interface Props {
   maxMinutes?: number;
   taskColor?: string;
+  disabled?: boolean;
   onComplete: (durationSeconds: number) => void;
 }
 
-export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", onComplete }: Props) {
+export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = false, onComplete }: Props) {
   const [fillPct, setFillPct] = useState(0);
   const [phase, setPhase] = useState<Phase>("idle");
   const [remainingSeconds, setRemainingSeconds] = useState(0);
@@ -69,7 +75,7 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", onComplete }
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
-      if (phase === "running") return;
+      if (phase === "running" || disabled) return;
       if (phase === "resting") {
         setPhase("idle");
         setBreakSeconds(0);
@@ -90,8 +96,11 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", onComplete }
       if (phase !== "dragging") return;
       const trackW = getTrackWidth();
       const dx = e.clientX - dragStartX.current;
-      const deltaFill = (dx / trackW) * 100;
-      const newFill = Math.max(0, Math.min(100, dragStartFill.current + deltaFill));
+      // Quadratic ease-out over RESISTANCE × trackWidth of travel.
+      // Fills quickly at first, then the last stretch demands real effort.
+      const rawProgress = Math.max(0, dx) / (trackW * RESISTANCE);
+      const eased = 1 - Math.pow(1 - Math.min(1, rawProgress), 2);
+      const newFill = Math.max(0, eased * 100);
       setFillPct(newFill);
 
       if (newFill >= 100 && !wasAtMax.current) {
@@ -240,16 +249,16 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", onComplete }
               className="text-7xl font-bold tabular-nums"
               style={{
                 fontFamily: "Georgia, serif",
-                color: atMax ? FG : fg(0.4),
+                color: disabled ? fg(0.2) : atMax ? FG : fg(0.4),
               }}
             >
               {maxMinutes}
             </div>
             <div
               className="text-xs font-semibold tracking-widest uppercase mt-1"
-              style={{ color: atMax ? fg(0.9) : fg(0.4) }}
+              style={{ color: disabled ? fg(0.3) : atMax ? fg(0.9) : fg(0.4) }}
             >
-              {atMax ? "release to start" : "drag to fill"}
+              {disabled ? "select a task to start" : atMax ? "release to start" : "drag to fill"}
             </div>
           </motion.div>
         )}
@@ -279,7 +288,8 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", onComplete }
           background: fg(0.08),
           border: `1px solid ${fg(0.12)}`,
           boxShadow: "inset 0 2px 8px rgba(0,0,0,0.25)",
-          cursor: isRunning ? "default" : "ew-resize",
+          cursor: isRunning || disabled ? "default" : "ew-resize",
+          opacity: disabled ? 0.5 : 1,
         }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
