@@ -10,6 +10,8 @@ const DEFAULT_PROPS = {
   initialTodaySessions: [],
   initialStreak: 0,
   initialMaxMinutes: 25,
+  initialWaitMinutes: 5,
+  initialStrictWait: false,
 };
 
 beforeEach(() => {

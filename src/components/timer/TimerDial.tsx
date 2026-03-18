@@ -42,10 +42,12 @@ interface Props {
   maxMinutes?: number;
   taskColor?: string;
   disabled?: boolean;
+  waitMinutes?: number;
+  strictMode?: boolean;
   onComplete: (durationSeconds: number) => void;
 }
 
-export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = false, onComplete }: Props) {
+export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = false, waitMinutes = 5, strictMode = false, onComplete }: Props) {
   const [fillPct, setFillPct] = useState(0);
   const [phase, setPhase] = useState<Phase>("idle");
   const [remainingSeconds, setRemainingSeconds] = useState(0);
@@ -64,9 +66,12 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
   useEffect(() => {
     if (phase !== "resting") return;
     setBreakSeconds(0);
-    const id = setInterval(() => setBreakSeconds((s) => s + 1), 1000);
+    const maxBreak = waitMinutes * 60;
+    const id = setInterval(() => {
+      setBreakSeconds((s) => s >= maxBreak ? s : Math.min(s + 1, maxBreak));
+    }, 1000);
     return () => clearInterval(id);
-  }, [phase]);
+  }, [phase, waitMinutes]);
 
   const getTrackWidth = useCallback(
     () => trackRef.current?.getBoundingClientRect().width ?? 320,
@@ -78,6 +83,8 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
     (clientX: number) => {
       if (phase === "running" || disabled) return;
       if (phase === "resting") {
+        const breakDone = breakSeconds >= (waitMinutes ?? 5) * 60;
+        if (strictMode && !breakDone) return; // blocked
         setPhase("idle");
         setBreakSeconds(0);
         setFillPct(0);
@@ -88,7 +95,7 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
       wasAtMax.current = false;
       setPhase("dragging");
     },
-    [phase, fillPct, disabled]
+    [phase, fillPct, disabled, breakSeconds, waitMinutes, strictMode]
   );
 
   const moveDrag = useCallback(
@@ -208,6 +215,7 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
   const isDragging = phase === "dragging";
   const isResting = phase === "resting";
   const atMax = fillPct >= 99.5;
+  const breakDone = breakSeconds >= (waitMinutes ?? 5) * 60;
 
   const majorTicks = Array.from(
     { length: Math.floor(maxMinutes / 5) + 1 },
@@ -260,23 +268,13 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
             {formatTime(remainingSeconds)}
           </motion.div>
         ) : isResting ? (
-          <motion.div
-            key="resting"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center"
-          >
-            <div
-              className="text-xs font-bold tracking-widest uppercase mb-1"
-              style={{ color: fg(0.5) }}
-            >
-              Break
+          <motion.div key="resting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
+            <div className="text-xs font-bold tracking-widest uppercase mb-1" style={{ color: fg(0.5) }}>
+              {breakDone ? "Break over" : "Break"}
             </div>
-            <div
-              className="text-6xl font-bold tabular-nums"
-              style={{ fontFamily: "Georgia, serif", color: fg(0.55) }}
-            >
-              {formatTime(breakSeconds)}
+            <div className="text-6xl font-bold tabular-nums"
+              style={{ fontFamily: "Georgia, serif", color: breakDone ? fg(0.8) : fg(0.55) }}>
+              {formatTime(Math.min(breakSeconds, (waitMinutes ?? 5) * 60))}
             </div>
           </motion.div>
         ) : (
@@ -460,7 +458,9 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
               className="text-sm font-semibold"
               style={{ color: fg(0.4) }}
             >
-              drag to start another
+              {strictMode && !breakDone
+                ? "break in progress..."
+                : "drag to start another"}
             </motion.p>
           ) : null}
         </AnimatePresence>

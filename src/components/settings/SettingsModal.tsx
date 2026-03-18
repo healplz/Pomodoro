@@ -8,11 +8,15 @@ const fg = (alpha: number) => `rgba(202,236,252,${alpha})`;
 interface Props {
   open: boolean;
   currentMinutes: number;
+  currentWaitMinutes: number;
+  currentStrict: boolean;
   onClose: () => void;
   onSave: (minutes: number) => void;
+  onSaveWait: (minutes: number) => void;
+  onSaveStrict: (strict: boolean) => void;
 }
 
-export function SettingsModal({ open, currentMinutes, onClose, onSave }: Props) {
+export function SettingsModal({ open, currentMinutes, currentWaitMinutes, currentStrict, onClose, onSave, onSaveWait, onSaveStrict }: Props) {
   return (
     <AnimatePresence>
       {open && (
@@ -73,6 +77,54 @@ export function SettingsModal({ open, currentMinutes, onClose, onSave }: Props) 
             <p className="text-center mt-4 text-xs font-semibold" style={{ color: fg(0.35) }}>
               Current: {currentMinutes} min
             </p>
+
+            <div className="mt-5">
+              <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: fg(0.5) }}>
+                Break duration
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                {[5, 10, 15].map((min) => {
+                  const isSelected = min === currentWaitMinutes;
+                  return (
+                    <button
+                      key={min}
+                      onClick={() => onSaveWait(min)}
+                      className="py-3 rounded-xl text-sm font-bold transition-all"
+                      style={{
+                        background: isSelected ? fg(0.25) : fg(0.08),
+                        color: isSelected ? "#CAECFC" : fg(0.6),
+                        border: `1px solid ${isSelected ? fg(0.4) : fg(0.1)}`,
+                      }}
+                    >
+                      {min}m
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="mt-5 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold" style={{ color: fg(0.85) }}>Strict breaks</p>
+                <p className="text-xs mt-0.5" style={{ color: fg(0.4) }}>
+                  Can&apos;t start until break ends
+                </p>
+              </div>
+              <button
+                onClick={() => onSaveStrict(!currentStrict)}
+                className="relative w-12 h-6 rounded-full transition-colors flex-shrink-0"
+                style={{
+                  background: currentStrict ? "#31C202" : fg(0.15),
+                }}
+              >
+                <motion.span
+                  className="absolute top-0.5 w-5 h-5 rounded-full"
+                  style={{ background: "#CAECFC" }}
+                  animate={{ left: currentStrict ? "calc(100% - 22px)" : "2px" }}
+                  transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                />
+              </button>
+            </div>
           </motion.div>
         </>
       )}

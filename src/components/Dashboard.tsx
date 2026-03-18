@@ -15,6 +15,8 @@ interface Props {
   initialTodaySessions: DotSession[];
   initialStreak: number;
   initialMaxMinutes: number;
+  initialWaitMinutes: number;
+  initialStrictWait: boolean;
 }
 
 export function Dashboard({
@@ -23,6 +25,8 @@ export function Dashboard({
   initialTodaySessions,
   initialStreak,
   initialMaxMinutes,
+  initialWaitMinutes,
+  initialStrictWait,
 }: Props) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [selectedTask, setSelectedTask] = useState<Task | null>(
@@ -31,6 +35,8 @@ export function Dashboard({
   const [todaySessions, setTodaySessions] = useState<DotSession[]>(initialTodaySessions);
   const [streak, setStreak] = useState(initialStreak);
   const [pomoDurationMinutes, setPomoDurationMinutes] = useState(initialMaxMinutes);
+  const [waitMinutes, setWaitMinutes] = useState(initialWaitMinutes);
+  const [strictMode, setStrictMode] = useState(initialStrictWait);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   async function handleSessionComplete(durationSeconds: number) {
@@ -64,6 +70,32 @@ export function Dashboard({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pomoDurationMinutes: minutes }),
+      });
+    } catch {
+      // Silently fail
+    }
+  }
+
+  async function handleSaveWait(minutes: number) {
+    setWaitMinutes(minutes);
+    try {
+      await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ waitDurationMinutes: minutes }),
+      });
+    } catch {
+      // Silently fail
+    }
+  }
+
+  async function handleSaveStrict(strict: boolean) {
+    setStrictMode(strict);
+    try {
+      await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ strictWait: strict }),
       });
     } catch {
       // Silently fail
@@ -132,6 +164,8 @@ export function Dashboard({
             maxMinutes={pomoDurationMinutes}
             taskColor={selectedTask?.color ?? "#31C202"}
             disabled={!selectedTask}
+            waitMinutes={waitMinutes}
+            strictMode={strictMode}
             onComplete={handleSessionComplete}
           />
         </div>
@@ -158,8 +192,12 @@ export function Dashboard({
       <SettingsModal
         open={settingsOpen}
         currentMinutes={pomoDurationMinutes}
+        currentWaitMinutes={waitMinutes}
+        currentStrict={strictMode}
         onClose={() => setSettingsOpen(false)}
         onSave={handleSaveSettings}
+        onSaveWait={handleSaveWait}
+        onSaveStrict={handleSaveStrict}
       />
     </main>
   );

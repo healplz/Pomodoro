@@ -77,4 +77,6 @@ export const userSettings = sqliteTable("user_settings", {
     .primaryKey()
     .references(() => users.id, { onDelete: "cascade" }),
   pomoDurationMinutes: integer("pomo_duration_minutes").notNull().default(25),
+  waitDurationMinutes: integer("wait_duration_minutes").notNull().default(5),
+  strictWait: integer("strict_wait", { mode: "boolean" }).notNull().default(false),
 });

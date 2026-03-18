@@ -54,6 +54,8 @@ export default async function Home() {
     .from(userSettings)
     .where(eq(userSettings.userId, userId));
   const pomoDurationMinutes = settingsRow[0]?.pomoDurationMinutes ?? 25;
+  const waitDurationMinutes = settingsRow[0]?.waitDurationMinutes ?? 5;
+  const strictWait = settingsRow[0]?.strictWait ?? false;
 
   return (
     <Dashboard
@@ -67,6 +69,8 @@ export default async function Home() {
       initialTodaySessions={todaySessions}
       initialStreak={computeStreak(uniqueDates)}
       initialMaxMinutes={pomoDurationMinutes}
+      initialWaitMinutes={waitDurationMinutes}
+      initialStrictWait={strictWait}
     />
   );
 }
