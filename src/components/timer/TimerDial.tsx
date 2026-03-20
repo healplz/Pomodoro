@@ -310,7 +310,7 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
               className="text-xs font-semibold tracking-widest uppercase mt-1"
               style={{ color: disabled ? fg(0.3) : atMax ? fg(0.9) : fg(0.4) }}
             >
-              {disabled ? "select a task to start" : atMax ? "release to start" : "drag to fill"}
+              {disabled ? "select a task to start" : atMax ? "release to start" : "drag to start"}
             </div>
           </motion.div>
         )}
