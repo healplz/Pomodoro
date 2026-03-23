@@ -184,6 +184,13 @@ export function Dashboard({
             selectedId={selectedTask?.id ?? null}
             onSelect={setSelectedTask}
             onTaskCreated={(task) => setTasks((prev) => [...prev, task])}
+            onTaskDeleted={(id) => {
+              setTasks((prev) => prev.filter((t) => t.id !== id));
+              if (selectedTask?.id === id) {
+                const remaining = tasks.filter((t) => t.id !== id);
+                setSelectedTask(remaining[0] ?? null);
+              }
+            }}
             sessions={todaySessions}
           />
         </div>

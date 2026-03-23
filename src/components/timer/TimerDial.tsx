@@ -105,7 +105,7 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
       const dx = clientX - dragStartX.current;
       // Cap drag distance to 85% of viewport so mobile users can always
       // reach 100% in one swipe. On desktop RESISTANCE still applies.
-      const screenAvailable = window.innerWidth - dragStartX.current - 16;
+      const screenAvailable = window.innerWidth - dragStartX.current - 48;
       const maxDrag = Math.min(trackW * RESISTANCE, screenAvailable);
       const rawProgress = Math.max(0, dx) / maxDrag;
       const eased = 1 - Math.pow(1 - Math.min(1, rawProgress), 2);
