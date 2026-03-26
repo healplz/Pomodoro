@@ -163,6 +163,7 @@ export function Dashboard({
           <TimerDial
             maxMinutes={pomoDurationMinutes}
             taskColor={selectedTask?.color ?? "#31C202"}
+            taskName={selectedTask?.name}
             disabled={!selectedTask}
             waitMinutes={waitMinutes}
             strictMode={strictMode}

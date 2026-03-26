@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { PwaSetup } from "@/components/PwaSetup";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,9 +13,20 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  themeColor: "#C30232",
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
   title: "Pomodoro",
-  description: "A focused Pomodoro timer with streaks",
+  description: "Focused work sessions with streaks",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Pomo",
+  },
 };
 
 export default function RootLayout({
@@ -24,9 +36,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <PwaSetup />
         {children}
       </body>
     </html>

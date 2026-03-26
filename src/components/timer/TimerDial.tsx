@@ -3,6 +3,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTimerCountdown } from "./useTimerCountdown";
+import { useTimerNotification } from "@/hooks/useTimerNotification";
 
 type Phase = "idle" | "dragging" | "running" | "complete" | "resting";
 
@@ -41,13 +42,16 @@ const RESISTANCE = 1.8;
 interface Props {
   maxMinutes?: number;
   taskColor?: string;
+  taskName?: string;
   disabled?: boolean;
   waitMinutes?: number;
   strictMode?: boolean;
   onComplete: (durationSeconds: number) => void;
 }
 
-export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = false, waitMinutes = 5, strictMode = false, onComplete }: Props) {
+export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", taskName = undefined, disabled = false, waitMinutes = 5, strictMode = false, onComplete }: Props) {
+  const { requestPermission, schedule, cancel } = useTimerNotification();
+
   const [fillPct, setFillPct] = useState(0);
   const [phase, setPhase] = useState<Phase>("idle");
   const [remainingSeconds, setRemainingSeconds] = useState(0);
@@ -129,11 +133,12 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
       setRemainingSeconds(maxMinutes * 60);
       setFillPct(100);
       setPhase("running");
+      void requestPermission().then(() => schedule(maxMinutes * 60, taskName));
     } else {
       setFillPct(0);
       setPhase("idle");
     }
-  }, [phase, fillPct, maxMinutes]);
+  }, [phase, fillPct, maxMinutes, requestPermission, schedule, taskName]);
 
   // Pointer event handlers (desktop + some mobile)
   const handlePointerDown = useCallback(
@@ -176,10 +181,11 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
   }, [endDrag]);
 
   const handleCancel = useCallback(() => {
+    cancel();
     setPhase("idle");
     setFillPct(0);
     setRemainingSeconds(0);
-  }, []);
+  }, [cancel]);
 
   const handleTick = useCallback((remaining: number) => {
     setRemainingSeconds(remaining);
@@ -189,11 +195,12 @@ export function TimerDial({ maxMinutes = 25, taskColor = "#31C202", disabled = f
   }, []);
 
   const handleComplete = useCallback(() => {
+    cancel();
     playBell();
     setFillPct(0);
     setPhase("complete");
     onComplete(totalSecondsRef.current);
-  }, [onComplete]);
+  }, [cancel, onComplete]);
 
   useTimerCountdown(
     phase === "running" ? totalSecondsRef.current : null,
