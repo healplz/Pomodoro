@@ -5,35 +5,52 @@ import { useEffect, useRef } from "react";
  * Pass null to stop/reset.
  * onTick fires every second with remaining seconds.
  * onComplete fires when remaining hits 0.
+ *
+ * Anchored to Date.now() so the countdown stays accurate if the browser
+ * throttles setInterval (backgrounded tabs, mobile, etc.). A
+ * visibilitychange listener forces an immediate resync when the tab
+ * regains focus so the display never shows stale time.
  */
 export function useTimerCountdown(
   totalSeconds: number | null,
   onTick: (remaining: number) => void,
   onComplete: () => void
 ) {
-  const remainingRef = useRef(0);
   const onTickRef = useRef(onTick);
   const onCompleteRef = useRef(onComplete);
 
-  // Keep refs current without restarting the effect
   onTickRef.current = onTick;
   onCompleteRef.current = onComplete;
 
   useEffect(() => {
     if (totalSeconds === null) return;
 
-    remainingRef.current = totalSeconds;
+    const startedAt = Date.now();
+    let completed = false;
+    let id: ReturnType<typeof setInterval>;
 
-    const interval = setInterval(() => {
-      remainingRef.current -= 1;
-      onTickRef.current(remainingRef.current);
-
-      if (remainingRef.current <= 0) {
-        clearInterval(interval);
+    function tick() {
+      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+      const remaining = Math.max(0, totalSeconds! - elapsed);
+      onTickRef.current(remaining);
+      if (remaining <= 0 && !completed) {
+        completed = true;
+        clearInterval(id);
         onCompleteRef.current();
       }
-    }, 1000);
+    }
 
-    return () => clearInterval(interval);
+    tick(); // immediate tick so display updates instantly on start
+    id = setInterval(tick, 1000);
+
+    function onVisibilityChange() {
+      if (document.visibilityState === "visible") tick();
+    }
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
   }, [totalSeconds]);
 }

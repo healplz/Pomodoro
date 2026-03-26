@@ -22,6 +22,12 @@ describe("useTimerCountdown", () => {
     expect(onComplete).not.toHaveBeenCalled();
   });
 
+  it("calls onTick immediately on mount with the full remaining time", () => {
+    const onTick = jest.fn();
+    renderHook(() => useTimerCountdown(5, onTick, jest.fn()));
+    expect(onTick).toHaveBeenCalledWith(5);
+  });
+
   it("calls onTick with decreasing remaining seconds each second", () => {
     const onTick = jest.fn();
     const onComplete = jest.fn();
@@ -52,10 +58,10 @@ describe("useTimerCountdown", () => {
     const onComplete = jest.fn(() => calls.push(-1));
 
     renderHook(() => useTimerCountdown(2, onTick, onComplete));
-
+    // immediate tick fires with 2 on mount
     act(() => { jest.advanceTimersByTime(2000); });
 
-    expect(calls).toEqual([1, 0, -1]);
+    expect(calls).toEqual([2, 1, 0, -1]);
   });
 
   it("does not call onComplete multiple times", () => {
@@ -114,8 +120,9 @@ describe("useTimerCountdown", () => {
       useTimerCountdown(5, currentTick, jest.fn())
     );
 
+    // immediate tick on mount + one interval tick
     act(() => { jest.advanceTimersByTime(1000); });
-    expect(onTick1).toHaveBeenCalledTimes(1);
+    expect(onTick1).toHaveBeenCalledTimes(2); // mount tick + 1s tick
 
     currentTick = onTick2;
     rerender();
@@ -123,6 +130,6 @@ describe("useTimerCountdown", () => {
     act(() => { jest.advanceTimersByTime(1000); });
     // The new callback should be used without restarting
     expect(onTick2).toHaveBeenCalledTimes(1);
-    expect(onTick1).toHaveBeenCalledTimes(1); // not called again
+    expect(onTick1).toHaveBeenCalledTimes(2); // not called again
   });
 });
